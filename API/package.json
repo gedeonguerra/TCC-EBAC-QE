@@ -1,0 +1,17 @@
+{
+  "name": "tcc-ebac-api",
+  "version": "1.0.0",
+  "description": "Testes de API com Supertest + Jest - EBAC Shop",
+  "scripts": {
+    "test": "jest --runInBand --forceExit",
+    "test:report": "jest --runInBand --forceExit --json --outputFile=api-report.json"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 15000
+  }
+}
