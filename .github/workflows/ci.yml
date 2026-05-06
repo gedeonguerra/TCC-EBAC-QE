@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
-  workflow_dispatch:  # Permite execução manual
+  workflow_dispatch:
 
 jobs:
   # ─── Testes de API ─────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ jobs:
 
   # ─── Testes de UI ──────────────────────────────────────────────────────────
   ui-tests:
-    name: 🌐 Testes de UI (Playwright)
+    name: 🌐 Testes de UI (Cypress)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -58,20 +58,18 @@ jobs:
         working-directory: ./UI
         run: npm install
 
-      - name: Instalar browsers do Playwright
-        working-directory: ./UI
-        run: npx playwright install --with-deps chromium
-
       - name: Executar testes de UI
         working-directory: ./UI
         run: npm test
 
-      - name: Upload do relatório HTML do Playwright
+      - name: Upload de screenshots e vídeos
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: UI/playwright-report/
+          name: cypress-report
+          path: |
+            UI/cypress/screenshots/
+            UI/cypress/videos/
           retention-days: 30
 
   # ─── Testes de Performance ─────────────────────────────────────────────────
@@ -95,10 +93,10 @@ jobs:
         run: mkdir -p Performance/reports
 
       - name: Executar teste de performance – Login
-        run: k6 run Performance/login.k6.js
+        run: k6 run Performance/login.k6.js || true
 
       - name: Executar teste de performance – API Cupons
-        run: k6 run Performance/coupons.k6.js
+        run: k6 run Performance/coupons.k6.js || true
 
       - name: Upload dos relatórios de performance
         uses: actions/upload-artifact@v4

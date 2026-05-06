@@ -1,12 +1,12 @@
 {
   "name": "tcc-ebac-ui",
   "version": "1.0.0",
-  "description": "Testes de UI automatizados com Playwright - EBAC Shop",
+  "description": "Testes de UI com Cypress - EBAC Shop",
   "scripts": {
-    "test": "npx playwright test",
-    "test:report": "npx playwright show-report"
+    "test": "cypress run --headless --browser chrome",
+    "test:open": "cypress open"
   },
   "devDependencies": {
-    "@playwright/test": "^1.44.0"
+    "cypress": "^13.0.0"
   }
 }
