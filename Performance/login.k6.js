@@ -17,7 +17,7 @@ export const options = {
     { duration: '20s', target: 0 },    // RampDown: 20 → 0 VUs
   ],
   thresholds: {
-    http_req_duration: ['p(95)<3000'],  // 95% das requisições abaixo de 3s
+    http_req_duration: ['p(95)<2000'],  // 95% das requisições abaixo de 3s
     login_success_rate: ['rate>0.95'],  // Taxa de sucesso acima de 95%
     http_req_failed: ['rate<0.05'],     // Taxa de falha abaixo de 5%
   },

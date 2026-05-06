@@ -4,17 +4,18 @@
 class LoginPage {
   constructor(page) {
     this.page = page;
-    this.usernameInput   = page.locator('#username');
-    this.passwordInput   = page.locator('#password');
-    this.loginButton     = page.locator('button[name="login"]');
-    this.errorMessage    = page.locator('.woocommerce-error');
-    this.logoutLink      = page.locator('a.logout');
-    this.accountTitle    = page.locator('.woocommerce-MyAccount-content');
+    this.usernameInput = page.locator('#username');
+    this.passwordInput = page.locator('#password');
+    this.loginButton = page.locator('button[name="login"]');
+    this.errorMessage = page.locator('.woocommerce-error');
+    this.logoutLink = page.locator('a.logout');
+    this.accountTitle = page.locator('.woocommerce-MyAccount-content');
     this.lostPasswordLink = page.locator('a[href*="lost-password"]');
   }
 
   async navigate() {
     await this.page.goto('/minha-conta/');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async login(username, password) {
