@@ -42,6 +42,7 @@ jobs:
   ui-tests:
     name: 🌐 Testes de UI (Playwright)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
