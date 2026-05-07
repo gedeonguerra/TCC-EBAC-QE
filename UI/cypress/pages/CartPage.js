@@ -16,21 +16,20 @@ class CartPage {
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    // Clica no botão de Size pelo texto visível
+    // Plugin woo-variation-swatches: botões visuais são <li> dentro de .variable-items-wrapper
+    // O <select> nativo fica com display:none — clicar nos <li> visíveis
     cy.get('.variations tr').contains('Size')
       .closest('tr')
-      .find('.variable-items-wrapper li, .swatch-wrapper, td.value')
-      .contains(size)
-      .click()
+      .find('ul.variable-items-wrapper li')
+      .contains(new RegExp(`^${size}$`))
+      .click({ force: true })
 
-    // Clica no botão de Color pelo texto visível
     cy.get('.variations tr').contains('Color')
       .closest('tr')
-      .find('.variable-items-wrapper li, .swatch-wrapper, td.value')
-      .contains(color)
-      .click()
+      .find('ul.variable-items-wrapper li')
+      .contains(new RegExp(`^${color}$`))
+      .click({ force: true })
 
-    // Aguarda botão habilitar
     cy.get('.single_add_to_cart_button', { timeout: 10000 })
       .should('not.have.class', 'disabled')
       .and('be.visible')
@@ -66,7 +65,7 @@ class CartPage {
 
   applyCoupon(code) {
     cy.get('#coupon_code').should('be.visible').type(code)
-    cy.get('[name="apply_oupon"]').click()
+    cy.get('[name="apply_coupon"]').click()
   }
 }
 
