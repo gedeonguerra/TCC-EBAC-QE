@@ -2,27 +2,30 @@
 // US-0001: Adicionar item ao carrinho
 
 class CartPage {
-  get qtyField()        { return cy.get('input.qty') }
+  get qtyField() { return cy.get('input.qty') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
-  get cartMessage()     { return cy.get('.woocommerce-message') }
-  get viewCartButton()  { return cy.get('.woocommerce-message > .button') }
-  get checkoutButton()  { return cy.get('.checkout-button') }
-  get orderTotal()      { return cy.get('.order-total > td') }
-  get errorNotice()     { return cy.get('.woocommerce-error') }
+  get cartMessage() { return cy.get('.woocommerce-message') }
+  get viewCartButton() { return cy.get('.woocommerce-message > .button') }
+  get checkoutButton() { return cy.get('.checkout-button') }
+  get orderTotal() { return cy.get('.order-total > td') }
+  get errorNotice() { return cy.get('.woocommerce-error') }
 
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
+    cy.wait(2000)
     cy.get('.variations', { timeout: 20000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    // Plugin woo-variation-swatches: botões visuais são <li> dentro de .variable-items-wrapper
-    // O <select> nativo fica com display:none — clicar nos <li> visíveis
+    // Clica no li visível do plugin de swatches
     cy.get('.variations tr').contains('Size')
       .closest('tr')
       .find('ul.variable-items-wrapper li')
       .contains(new RegExp(`^${size}$`))
       .click({ force: true })
+
+    // Pequena espera para o plugin processar o clique
+    cy.wait(500)
 
     cy.get('.variations tr').contains('Color')
       .closest('tr')
@@ -30,8 +33,17 @@ class CartPage {
       .contains(new RegExp(`^${color}$`))
       .click({ force: true })
 
-    cy.get('.single_add_to_cart_button', { timeout: 10000 })
-      .should('not.have.class', 'disabled')
+    cy.wait(500)
+
+    // Verifica que a classe 'selected' foi aplicada em pelo menos um li
+    cy.get('.variations tr').contains('Size')
+      .closest('tr')
+      .find('ul.variable-items-wrapper li.selected')
+      .should('exist')
+
+    cy.get('.single_add_to_cart_button', { timeout: 15000 })
+      .should('not.have.class', 'wc-variation-selection-needed')
+      .and('not.have.class', 'disabled')
       .and('be.visible')
   }
 
