@@ -4,3 +4,4 @@ UI/cypress/screenshots/
 UI/cypress/reports/
 .env
 *.log
+cypress.env.json

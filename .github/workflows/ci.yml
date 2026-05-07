@@ -43,6 +43,10 @@ jobs:
     name: 🌐 Testes de UI (Cypress)
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      CYPRESS_USUARIO_VALIDO: ${{ secrets.CYPRESS_USUARIO_VALIDO }}
+      CYPRESS_SENHA_VALIDA:   ${{ secrets.CYPRESS_SENHA_VALIDA }}
+      CYPRESS_PRODUTO_SLUG:   ${{ secrets.CYPRESS_PRODUTO_SLUG }}
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
