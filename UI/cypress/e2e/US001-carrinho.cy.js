@@ -4,7 +4,7 @@
 // Técnicas: Partição de Equivalência | Valor Limite
 
 const loginPage = require('../pages/LoginPage')
-const cart      = require('../pages/CartPage')
+const cart = require('../pages/CartPage')
 
 const PRODUTO_SLUG = Cypress.env('PRODUTO_SLUG') || 'teton-pullover-hoodie'
 
@@ -17,6 +17,31 @@ describe('US-0001: Adicionar item ao carrinho', () => {
       Cypress.env('USUARIO_VALIDO'),
       Cypress.env('SENHA_VALIDA')
     )
+  })
+
+  it('DEBUG: inspecionar seletores de variação', () => {
+    cart.visitProduct(PRODUTO_SLUG)
+
+    // Loga todo o HTML da área de variações
+    cy.get('.variations').then(($el) => {
+      cy.log('HTML variations:', $el.html())
+    })
+
+    // Verifica se .variable-items-wrapper existe
+    cy.get('body').then(($body) => {
+      const swatches = $body.find('.variable-items-wrapper')
+      cy.log('Swatches encontrados:', swatches.length)
+      cy.log('HTML swatch[0]:', swatches.length > 0 ? swatches[0].outerHTML : 'NENHUM')
+
+      const selects = $body.find('select[name*="attribute_pa"]')
+      cy.log('Selects nativos encontrados:', selects.length)
+      selects.each((i, el) => {
+        cy.log(`Select[${i}] name:`, el.getAttribute('name'))
+      })
+    })
+
+    // Tira screenshot para ver a página
+    cy.screenshot('debug-variacoes')
   })
 
   // CT-001-01 | Caminho Feliz | Partição de Equivalência (1 item válido)
