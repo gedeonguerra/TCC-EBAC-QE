@@ -2,16 +2,17 @@
 // US-0001: Adicionar item ao carrinho
 
 class CartPage {
-  get qtyField()        { return cy.get('input.qty') }
+  get qtyField() { return cy.get('input.qty') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
-  get cartMessage()     { return cy.get('.woocommerce-message') }
-  get viewCartButton()  { return cy.get('.woocommerce-message > .button') }
-  get checkoutButton()  { return cy.get('.checkout-button') }
-  get orderTotal()      { return cy.get('.order-total > td') }
-  get errorNotice()     { return cy.get('.woocommerce-error') }
+  get cartMessage() { return cy.get('.woocommerce-message') }
+  get viewCartButton() { return cy.get('.woocommerce-message > .button') }
+  get checkoutButton() { return cy.get('.checkout-button') }
+  get orderTotal() { return cy.get('.order-total > td') }
+  get errorNotice() { return cy.get('.woocommerce-error') }
 
   visitProduct(slug) {
     cy.visit(`/produto/${slug}/`)
+    cy.get('.product_title', { timeout: 15000 }).should('be.visible')
   }
 
   setQuantity(qty) {

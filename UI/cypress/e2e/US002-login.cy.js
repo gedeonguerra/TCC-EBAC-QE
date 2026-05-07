@@ -29,7 +29,7 @@ describe('US-0002: Login na plataforma', () => {
   // CT-002-03 | Caminho Negativo | Partição de Equivalência (usuário inválido)
   it('CT-002-03: Login com usuário inexistente deve exibir mensagem de erro', () => {
     loginPage.login('usuario.invalido@teste.com', 'qualquersenha')
-    loginPage.shouldShowError('Erro')
+    loginPage.shouldShowError('Endereço de e-mail desconhecido')
   })
 
   // CT-002-04 | Tabela de Decisão | 3 erros consecutivos → bloqueio
