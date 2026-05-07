@@ -11,21 +11,18 @@ class CartPage {
   get errorNotice()     { return cy.get('.woocommerce-error') }
 
   visitProduct(slug) {
-    cy.visit(`/produto/${slug}/`, { failOnStatusCode: false })
-    // Aguarda a tabela de variações — presente em produtos variáveis
-    cy.get('.variations', { timeout: 15000 }).should('exist')
+    cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
+    cy.get('.variations', { timeout: 20000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
     cy.get('body').then(($body) => {
       if ($body.find('.variable-items-wrapper').length > 0) {
-        // ── Plugin de swatches ativo ──────────────────────────────────
         cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_size"]')
           .contains(size).click()
         cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_color"]')
           .contains(color).click()
       } else {
-        // ── Select nativo WooCommerce (sem plugin) ────────────────────
         cy.get('select[name="attribute_pa_size"]')
           .should('be.visible')
           .select(size.toLowerCase())
