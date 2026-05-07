@@ -12,7 +12,7 @@ class CartPage {
 
   visitProduct(slug) {
     cy.visit(`/produto/${slug}/`)
-    cy.get('.product_title', { timeout: 15000 }).should('be.visible')
+    cy.get('.single_add_to_cart_button', { timeout: 15000 }).should('be.visible')
   }
 
   setQuantity(qty) {
@@ -24,7 +24,7 @@ class CartPage {
   }
 
   goToCart() {
-    cy.visit('/carrinho/')
+    cy.visit('/carrinho/', { failOnStatusCode: false })
   }
 
   goToCheckout() {

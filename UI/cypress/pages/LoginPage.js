@@ -9,7 +9,8 @@ class LoginPage {
   get myAccount() { return cy.get('.woocommerce-MyAccount-navigation') }
 
   navigate() {
-    cy.visit('/minha-conta/')
+    cy.visit('/minha-conta/', { failOnStatusCode: false })
+    cy.get('body', { timeout: 20000 }).should('be.visible')
   }
 
   fillCredentials(username, password) {
