@@ -9,13 +9,22 @@ class LoginPage {
   get myAccount()     { return cy.get('.woocommerce-MyAccount-navigation') }
 
   navigate() {
+    cy.clearCookies()
+    cy.clearLocalStorage()
     cy.visit('/minha-conta/', { failOnStatusCode: false })
+    // Se já estiver logado, faz logout primeiro
+    cy.get('body', { timeout: 10000 }).then(($body) => {
+      if ($body.find('.woocommerce-MyAccount-navigation').length > 0) {
+        cy.visit('/minha-conta/customer-logout/', { failOnStatusCode: false })
+        cy.visit('/minha-conta/', { failOnStatusCode: false })
+      }
+    })
     cy.get('#username', { timeout: 20000 }).should('be.visible')
   }
 
   fillCredentials(username, password) {
-    this.usernameField.clear().type(username)
-    this.passwordField.clear().type(password)
+    this.usernameField.clear().type(username, { log: false })
+    this.passwordField.clear().type(password, { log: false })
   }
 
   submit() {
@@ -33,9 +42,7 @@ class LoginPage {
   }
 
   shouldBeLoggedIn() {
-    // Aguarda redirect pós-login — URL muda para /minha-conta/
     cy.url({ timeout: 20000 }).should('include', 'minha-conta')
-    // Depois valida o menu de navegação
     this.myAccount.should('be.visible')
   }
 }

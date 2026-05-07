@@ -16,22 +16,21 @@ class CartPage {
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    cy.get('body').then(($body) => {
-      if ($body.find('.variable-items-wrapper').length > 0) {
-        cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_size"]')
-          .contains(size).click()
-        cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_color"]')
-          .contains(color).click()
-      } else {
-        cy.get('select[name="attribute_pa_size"]')
-          .should('be.visible')
-          .select(size.toLowerCase())
-        cy.get('select[name="attribute_pa_color"]')
-          .should('be.visible')
-          .select(color.toLowerCase())
-      }
-    })
+    // Clica no botão de Size pelo texto visível
+    cy.get('.variations tr').contains('Size')
+      .closest('tr')
+      .find('.variable-items-wrapper li, .swatch-wrapper, td.value')
+      .contains(size)
+      .click()
 
+    // Clica no botão de Color pelo texto visível
+    cy.get('.variations tr').contains('Color')
+      .closest('tr')
+      .find('.variable-items-wrapper li, .swatch-wrapper, td.value')
+      .contains(color)
+      .click()
+
+    // Aguarda botão habilitar
     cy.get('.single_add_to_cart_button', { timeout: 10000 })
       .should('not.have.class', 'disabled')
       .and('be.visible')
@@ -67,7 +66,7 @@ class CartPage {
 
   applyCoupon(code) {
     cy.get('#coupon_code').should('be.visible').type(code)
-    cy.get('[name="apply_coupon"]').click()
+    cy.get('[name="apply_oupon"]').click()
   }
 }
 
