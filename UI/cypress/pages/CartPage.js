@@ -15,24 +15,36 @@ class CartPage {
     cy.get('.single_add_to_cart_button', { timeout: 15000 }).should('exist')
   }
 
-  // FIX: selecionar variação antes de adicionar ao carrinho
-  // Produto variável exige Size + Color para habilitar o botão
+  // Resiliente: tenta swatches (plugin), cai para <select> nativo do WooCommerce
   selectVariation(size = 'L', color = 'Black') {
-    // Aguarda as swatches renderizarem
-    cy.get('.variable-items-wrapper', { timeout: 10000 }).should('be.visible')
+    cy.get('.variations', { timeout: 15000 }).should('exist')
 
-    // Seleciona Size
-    cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_size"]')
-      .contains(size)
-      .click()
+    cy.get('body').then(($body) => {
+      const hasSwatches = $body.find('.variable-items-wrapper').length > 0
 
-    // Seleciona Color
-    cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_color"]')
-      .contains(color)
-      .click()
+      if (hasSwatches) {
+        // ── Caminho com plugin de swatches ──────────────────────────────
+        cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_size"]')
+          .contains(size)
+          .click()
 
-    // Aguarda botão ser habilitado (WooCommerce remove classe 'disabled')
-    cy.get('.single_add_to_cart_button')
+        cy.get('.variable-items-wrapper[data-attribute_name="attribute_pa_color"]')
+          .contains(color)
+          .click()
+      } else {
+        // ── Caminho com <select> nativo WooCommerce ──────────────────────
+        cy.get('select[name="attribute_pa_size"]')
+          .should('be.visible')
+          .select(size.toLowerCase())
+
+        cy.get('select[name="attribute_pa_color"]')
+          .should('be.visible')
+          .select(color.toLowerCase())
+      }
+    })
+
+    // Em ambos os casos: aguarda o botão ficar habilitado
+    cy.get('.single_add_to_cart_button', { timeout: 10000 })
       .should('not.have.class', 'disabled')
       .and('be.visible')
   }
