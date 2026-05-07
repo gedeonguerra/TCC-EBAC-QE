@@ -2,11 +2,11 @@
 // US-0002: Login na plataforma
 
 class LoginPage {
-  get usernameField() { return cy.get('[name="username"]') }
-  get passwordField() { return cy.get('[name="password"]') }
-  get loginButton()   { return cy.get('[name="login"]') }
-  get errorMessage()  { return cy.get('.woocommerce-error') }
-  get myAccount()     { return cy.get('.woocommerce-MyAccount-navigation') }
+  get usernameField() { return cy.get('#username') }
+  get passwordField() { return cy.get('#password') }
+  get loginButton() { return cy.get('[name="login"]') }
+  get errorMessage() { return cy.get('.woocommerce-error') }
+  get myAccount() { return cy.get('.woocommerce-MyAccount-navigation') }
 
   navigate() {
     cy.visit('/minha-conta/')
