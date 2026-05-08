@@ -2,48 +2,50 @@
 // US-0001: Adicionar item ao carrinho
 
 class CartPage {
-  get qtyField() { return cy.get('input.qty') }
+  get qtyField()        { return cy.get('input.qty') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
-  get cartMessage() { return cy.get('.woocommerce-message') }
-  get viewCartButton() { return cy.get('.woocommerce-message > .button') }
-  get checkoutButton() { return cy.get('.checkout-button') }
-  get orderTotal() { return cy.get('.order-total > td') }
-  get errorNotice() { return cy.get('.woocommerce-error') }
+  get cartMessage()     { return cy.get('.woocommerce-message') }
+  get viewCartButton()  { return cy.get('.woocommerce-message > .button') }
+  get checkoutButton()  { return cy.get('.checkout-button') }
+  get orderTotal()      { return cy.get('.order-total > td') }
+  get errorNotice()     { return cy.get('.woocommerce-error') }
 
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
-    cy.wait(2000)
     cy.get('.variations', { timeout: 20000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    // Clica no li visível do plugin de swatches
-    cy.get('.variations tr').contains('Size')
-      .closest('tr')
-      .find('ul.variable-items-wrapper li')
-      .contains(new RegExp(`^${size}$`))
-      .click({ force: true })
+    // O plugin oculta o <select> nativo com display:none e sincroniza via JS.
+    // A forma correta é setar o valor no <select> oculto e disparar o evento
+    // 'change' que o WooCommerce escuta para atualizar o botão de compra.
 
-    // Pequena espera para o plugin processar o clique
+    cy.get('select[name="attribute_pa_size"]').then(($sel) => {
+      // Encontra o valor (slug) correspondente ao texto do tamanho
+      const option = [...$sel[0].options].find(o =>
+        o.text.toLowerCase() === size.toLowerCase() ||
+        o.value.toLowerCase() === size.toLowerCase()
+      )
+      if (option) {
+        cy.wrap($sel).invoke('val', option.value).trigger('change', { force: true })
+      }
+    })
+
     cy.wait(500)
 
-    cy.get('.variations tr').contains('Color')
-      .closest('tr')
-      .find('ul.variable-items-wrapper li')
-      .contains(new RegExp(`^${color}$`))
-      .click({ force: true })
-
-    cy.wait(500)
-
-    // Verifica que a classe 'selected' foi aplicada em pelo menos um li
-    cy.get('.variations tr').contains('Size')
-      .closest('tr')
-      .find('ul.variable-items-wrapper li.selected')
-      .should('exist')
+    cy.get('select[name="attribute_pa_color"]').then(($sel) => {
+      const option = [...$sel[0].options].find(o =>
+        o.text.toLowerCase() === color.toLowerCase() ||
+        o.value.toLowerCase() === color.toLowerCase()
+      )
+      if (option) {
+        cy.wrap($sel).invoke('val', option.value).trigger('change', { force: true })
+      }
+    })
 
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
-      .should('not.have.class', 'wc-variation-selection-needed')
-      .and('not.have.class', 'disabled')
+      .should('not.have.class', 'disabled')
+      .and('not.have.class', 'wc-variation-selection-needed')
       .and('be.visible')
   }
 
