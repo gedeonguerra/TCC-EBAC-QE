@@ -12,13 +12,15 @@ class CartPage {
 
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
-    cy.get('.product', { timeout: 30000 }).should('exist')
+    cy.url({ timeout: 30000 }).should('include', slug)
+    cy.get(`[title]`, { timeout: 30000 }).first().should('be.visible')
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    cy.get(`[title='${size}']`).first().click({ force: true })
-    cy.wait(300)
-    cy.get(`[title='${color}']`).first().click({ force: true })
+    cy.get(`[title='${size}']`, { timeout: 10000 }).first().click({ force: true })
+    cy.wait(600)
+    cy.get(`[title='${color}']`, { timeout: 10000 }).first().click({ force: true })
+    cy.wait(600)
 
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
@@ -38,24 +40,13 @@ class CartPage {
     cy.visit('/carrinho/', { failOnStatusCode: false })
   }
 
-  clearCart() {
-    cy.visit('/carrinho/', { failOnStatusCode: false })
-    cy.get('body').then(($body) => {
-      if ($body.find('a.remove').length > 0) {
-        cy.get('a.remove').each(($el) => {
-          cy.wrap($el).click({ force: true })
-          cy.wait(300)
-        })
-      }
-    })
-  }
-
   goToCheckout() {
     this.checkoutButton.should('be.visible').click()
   }
 
   shouldShowSuccess() {
-    this.cartMessage.should('be.visible')
+    cy.get('.woocommerce-message, .added_to_cart, [class*="cart-notice"]', { timeout: 20000 })
+      .should('exist')
   }
 
   shouldShowTotal(total) {

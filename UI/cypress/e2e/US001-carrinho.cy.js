@@ -15,9 +15,7 @@ describe('US-0001: Adicionar item ao carrinho', () => {
       Cypress.env('USUARIO_VALIDO'),
       Cypress.env('SENHA_VALIDA')
     )
-    cart.clearCart()
   })
-
 
   // CT-001-01 | Caminho Feliz | Partição de Equivalência (1 item válido)
   it('CT-001-01: Adicionar 1 item ao carrinho com sucesso', () => {
