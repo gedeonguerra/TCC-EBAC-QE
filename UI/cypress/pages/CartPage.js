@@ -12,36 +12,13 @@ class CartPage {
 
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
-    cy.get('.variations', { timeout: 20000 }).should('exist')
+    cy.get('.summary', { timeout: 20000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
-    // O plugin oculta o <select> nativo com display:none e sincroniza via JS.
-    // A forma correta é setar o valor no <select> oculto e disparar o evento
-    // 'change' que o WooCommerce escuta para atualizar o botão de compra.
-
-    cy.get('select[name="attribute_pa_size"]').then(($sel) => {
-      // Encontra o valor (slug) correspondente ao texto do tamanho
-      const option = [...$sel[0].options].find(o =>
-        o.text.toLowerCase() === size.toLowerCase() ||
-        o.value.toLowerCase() === size.toLowerCase()
-      )
-      if (option) {
-        cy.wrap($sel).invoke('val', option.value).trigger('change', { force: true })
-      }
-    })
-
-    cy.wait(500)
-
-    cy.get('select[name="attribute_pa_color"]').then(($sel) => {
-      const option = [...$sel[0].options].find(o =>
-        o.text.toLowerCase() === color.toLowerCase() ||
-        o.value.toLowerCase() === color.toLowerCase()
-      )
-      if (option) {
-        cy.wrap($sel).invoke('val', option.value).trigger('change', { force: true })
-      }
-    })
+    cy.get(`[title='${size}']`).first().click({ force: true })
+    cy.wait(300)
+    cy.get(`[title='${color}']`).first().click({ force: true })
 
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
