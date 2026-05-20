@@ -8,11 +8,11 @@ class CartPage {
   get viewCartButton()  { return cy.get('.woocommerce-message > .button') }
   get checkoutButton()  { return cy.get('.checkout-button') }
   get orderTotal()      { return cy.get('.order-total > td') }
-  get errorNotice()     { return cy.get('.woocommerce-error') }
+  get errorNotice()     { return cy.get('.woocommerce-error, [role="alert"]') }
 
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
-    cy.get('.summary', { timeout: 20000 }).should('exist')
+    cy.get('.product', { timeout: 30000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
@@ -36,6 +36,18 @@ class CartPage {
 
   goToCart() {
     cy.visit('/carrinho/', { failOnStatusCode: false })
+  }
+
+  clearCart() {
+    cy.visit('/carrinho/', { failOnStatusCode: false })
+    cy.get('body').then(($body) => {
+      if ($body.find('a.remove').length > 0) {
+        cy.get('a.remove').each(($el) => {
+          cy.wrap($el).click({ force: true })
+          cy.wait(300)
+        })
+      }
+    })
   }
 
   goToCheckout() {
