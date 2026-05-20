@@ -13,7 +13,7 @@ class CartPage {
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
     cy.url({ timeout: 30000 }).should('include', slug)
-    cy.get(`[title]`, { timeout: 30000 }).first().should('be.visible')
+    cy.get('.single_add_to_cart_button', { timeout: 30000 }).should('exist')
   }
 
   selectVariation(size = 'L', color = 'Black') {
