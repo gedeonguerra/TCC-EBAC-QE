@@ -5,7 +5,7 @@ class LoginPage {
   get usernameField() { return cy.get('#username') }
   get passwordField() { return cy.get('#password') }
   get loginButton()   { return cy.get('[name="login"]') }
-  get errorMessage()  { return cy.get('.woocommerce-error') }
+  get errorMessage()  { return cy.get('[role="alert"]') }
   get myAccount()     { return cy.get('.woocommerce-MyAccount-navigation') }
 
   navigate() {
@@ -38,8 +38,8 @@ class LoginPage {
       cy.get('#username').type(username, { log: false })
       cy.get('#password').type(password, { log: false })
       cy.get('[name="login"]').click()
-      cy.get('.woocommerce-MyAccount-navigation', { timeout: 20000 })
-        .should('be.visible')
+      cy.url({ timeout: 20000 }).should('include', 'minha-conta')
+      cy.get('#username', { timeout: 5000 }).should('not.exist')
     }, { cacheAcrossSpecs: false })
     cy.visit('/minha-conta/', { failOnStatusCode: false })
   }
@@ -52,12 +52,12 @@ class LoginPage {
   }
 
   shouldShowError(msg) {
-    this.errorMessage.should('be.visible').and('contain', msg)
+    cy.get('[role="alert"]').should('be.visible').and('contain', msg)
   }
 
   shouldBeLoggedIn() {
     cy.url({ timeout: 20000 }).should('include', 'minha-conta')
-    this.myAccount.should('be.visible')
+    cy.get('#username', { timeout: 5000 }).should('not.exist')
   }
 }
 
