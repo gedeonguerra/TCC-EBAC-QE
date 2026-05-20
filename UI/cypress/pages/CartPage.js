@@ -17,10 +17,31 @@ class CartPage {
   }
 
   selectVariation(size = 'L', color = 'Black') {
+    // Clica no swatch visível (atualiza estado visual do plugin)
     cy.get(`[title='${size}']`, { timeout: 10000 }).first().click({ force: true })
-    cy.wait(600)
+
+    // Força o <select> oculto + dispara o evento que o WooCommerce escuta
+    cy.get('select[name="attribute_pa_size"]', { timeout: 5000 }).then($sel => {
+      const opt = [...$sel[0].options].find(o =>
+        o.text.toLowerCase() === size.toLowerCase() ||
+        o.value.toLowerCase() === size.toLowerCase()
+      )
+      if (opt) cy.wrap($sel).invoke('val', opt.value).trigger('change', { force: true })
+    })
+
+    cy.wait(500)
+
     cy.get(`[title='${color}']`, { timeout: 10000 }).first().click({ force: true })
-    cy.wait(600)
+
+    cy.get('select[name="attribute_pa_color"]', { timeout: 5000 }).then($sel => {
+      const opt = [...$sel[0].options].find(o =>
+        o.text.toLowerCase() === color.toLowerCase() ||
+        o.value.toLowerCase() === color.toLowerCase()
+      )
+      if (opt) cy.wrap($sel).invoke('val', opt.value).trigger('change', { force: true })
+    })
+
+    cy.wait(500)
 
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
