@@ -1,7 +1,11 @@
 // Page Object Model — CartPage
 // US-0001: Adicionar item ao carrinho
+// FIX: seletores corrigidos para attribute_size e attribute_color
+//      conforme DOM real de lojaebac.ebaconline.art.br
 
 class CartPage {
+
+  // ── Getters ──────────────────────────────────────────────────────────────
   get qtyField()        { return cy.get('input.qty') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
   get cartMessage()     { return cy.get('.woocommerce-message') }
@@ -10,45 +14,42 @@ class CartPage {
   get orderTotal()      { return cy.get('.order-total > td') }
   get errorNotice()     { return cy.get('.woocommerce-error, [role="alert"]') }
 
+  // ── visitProduct ─────────────────────────────────────────────────────────
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
     cy.url({ timeout: 30000 }).should('include', slug)
+    cy.get('form.variations_form', { timeout: 15000 }).should('exist')
     cy.get('.single_add_to_cart_button', { timeout: 30000 }).should('exist')
   }
 
+  // ── selectVariation ──────────────────────────────────────────────────────
+  // Seletores corretos confirmados via DevTools:
+  //   select[name="attribute_size"]  → valores: XS | S | M | L | XL
+  //   select[name="attribute_color"] → valores: Black | Purple | Red
   selectVariation(size = 'L', color = 'Black') {
-    // Clica no swatch visível (atualiza estado visual do plugin)
-    cy.get(`[title='${size}']`, { timeout: 10000 }).first().click({ force: true })
 
-    // Força o <select> oculto + dispara o evento que o WooCommerce escuta
-    cy.get('select[name="attribute_pa_size"]', { timeout: 5000 }).then($sel => {
-      const opt = [...$sel[0].options].find(o =>
-        o.text.toLowerCase() === size.toLowerCase() ||
-        o.value.toLowerCase() === size.toLowerCase()
-      )
-      if (opt) cy.wrap($sel).invoke('val', opt.value).trigger('change', { force: true })
-    })
+    // Tamanho
+    cy.get('select[name="attribute_size"]', { timeout: 10000 })
+      .should('be.visible')
+      .select(size)
 
-    cy.wait(500)
+    cy.wait(300)
 
-    cy.get(`[title='${color}']`, { timeout: 10000 }).first().click({ force: true })
+    // Cor
+    cy.get('select[name="attribute_color"]', { timeout: 10000 })
+      .should('be.visible')
+      .select(color)
 
-    cy.get('select[name="attribute_pa_color"]', { timeout: 5000 }).then($sel => {
-      const opt = [...$sel[0].options].find(o =>
-        o.text.toLowerCase() === color.toLowerCase() ||
-        o.value.toLowerCase() === color.toLowerCase()
-      )
-      if (opt) cy.wrap($sel).invoke('val', opt.value).trigger('change', { force: true })
-    })
+    cy.wait(300)
 
-    cy.wait(500)
-
+    // Aguarda botão sair do estado disabled (variação 100% selecionada)
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
       .and('not.have.class', 'wc-variation-selection-needed')
       .and('be.visible')
   }
 
+  // ── Ações ─────────────────────────────────────────────────────────────────
   setQuantity(qty) {
     this.qtyField.clear().type(String(qty))
   }
@@ -65,6 +66,7 @@ class CartPage {
     this.checkoutButton.should('be.visible').click()
   }
 
+  // ── Assertions ────────────────────────────────────────────────────────────
   shouldShowSuccess() {
     cy.get('.woocommerce-message, .added_to_cart, [class*="cart-notice"]', { timeout: 20000 })
       .should('exist')
