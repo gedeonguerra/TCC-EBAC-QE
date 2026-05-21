@@ -18,7 +18,6 @@ class CartPage {
   get errorNotice()     { return cy.get('[role="alert"]') }
 
   // ── visitProduct ──────────────────────────────────────────────────────────
-  // Guard table.variations removido — intermitente em headless após session restore
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
     cy.url({ timeout: 30000 }).should('include', slug)
@@ -26,8 +25,6 @@ class CartPage {
   }
 
   // ── selectVariation ───────────────────────────────────────────────────────
-  // Clica no swatch visual + aciona change no <select> oculto
-  // (WooCommerce Variation Swatches oculta o select nativo com display:none)
   selectVariation(size = 'L', color = 'Black') {
     cy.get(`[title='${size}']`, { timeout: 10000 }).first().click({ force: true })
     cy.get('select[name="attribute_size"]').invoke('val', size).trigger('change', { force: true })
@@ -54,18 +51,20 @@ class CartPage {
   }
 
   // ── clearCart ─────────────────────────────────────────────────────────────
-  // Limpa todos os itens do carrinho — chamado no beforeEach do US001
-  // para evitar acúmulo de itens entre testes (sessão compartilhada)
+  // Remove itens um por vez re-consultando o DOM a cada clique
+  // (WooCommerce faz AJAX ao remover — .each() em cadeia causa detached DOM)
   clearCart() {
     cy.visit('/carrinho/', { failOnStatusCode: false })
-    cy.get('body').then($body => {
-      if ($body.find('a.remove').length > 0) {
-        cy.get('a.remove').each($btn => {
-          cy.wrap($btn).click({ force: true })
-          cy.wait(300)
-        })
-      }
-    })
+    const removeOne = () => {
+      cy.get('body').then($body => {
+        if ($body.find('a.remove').length > 0) {
+          cy.get('a.remove').first().click({ force: true })
+          cy.wait(600)
+          removeOne()
+        }
+      })
+    }
+    removeOne()
   }
 
   // ── goToCart ──────────────────────────────────────────────────────────────
