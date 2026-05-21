@@ -1,13 +1,3 @@
-// Page Object Model — CartPage
-// US-0001: Adicionar item ao carrinho
-//
-// Seletores confirmados via DevTools:
-//   Swatch tamanho  : [title='L'] etc
-//   Swatch cor      : [title='Black'] etc
-//   Botão carrinho  : .single_add_to_cart_button
-//   Campo qtd       : [type='number']
-//   Mensagem alerta : [role='alert']
-
 class CartPage {
 
   // ── Getters ───────────────────────────────────────────────────────────────
@@ -25,6 +15,8 @@ class CartPage {
   }
 
   // ── selectVariation ───────────────────────────────────────────────────────
+  // Clica no swatch visual + aciona change no <select> oculto
+  // (WooCommerce Variation Swatches oculta o select nativo com display:none)
   selectVariation(size = 'L', color = 'Black') {
     cy.get(`[title='${size}']`, { timeout: 10000 }).first().click({ force: true })
     cy.get('select[name="attribute_size"]').invoke('val', size).trigger('change', { force: true })
@@ -51,20 +43,23 @@ class CartPage {
   }
 
   // ── clearCart ─────────────────────────────────────────────────────────────
-  // Remove itens um por vez re-consultando o DOM a cada clique
-  // (WooCommerce faz AJAX ao remover — .each() em cadeia causa detached DOM)
+  // Remove itens um por vez re-consultando o DOM a cada clique.
+  // Após limpar, navega para home para estabilizar a sessão WooCommerce
+  // antes do próximo visitProduct (evita estado instável pós-redirect).
   clearCart() {
     cy.visit('/carrinho/', { failOnStatusCode: false })
     const removeOne = () => {
       cy.get('body').then($body => {
         if ($body.find('a.remove').length > 0) {
           cy.get('a.remove').first().click({ force: true })
-          cy.wait(600)
+          cy.wait(800)
           removeOne()
         }
       })
     }
     removeOne()
+    cy.visit('/', { failOnStatusCode: false })
+    cy.wait(500)
   }
 
   // ── goToCart ──────────────────────────────────────────────────────────────
