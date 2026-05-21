@@ -1,25 +1,13 @@
-// Page Object Model — CartPage
-// US-0001: Adicionar item ao carrinho
-//
-// Plugin: WooCommerce Variation Swatches
-// O <select> fica oculto (display:none). Os botões visuais são <li> com
-// classe .button-variable-item-{value} — é neles que o Cypress deve clicar.
-//
-// Seletores confirmados via DevTools:
-//   Tamanho : li.button-variable-item-XS | S | M | L | XL
-//   Cor     : li.button-variable-item-Black | Purple | Red
-//   Guard   : table.variations (não form.variations_form)
-
 class CartPage {
 
   // ── Getters ───────────────────────────────────────────────────────────────
-  get qtyField()        { return cy.get('input.qty') }
+  get qtyField()        { return cy.get('[type="number"]') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
-  get cartMessage()     { return cy.get('.woocommerce-message') }
+  get cartMessage()     { return cy.get('[role="alert"]') }
   get viewCartButton()  { return cy.get('.woocommerce-message > .button') }
   get checkoutButton()  { return cy.get('.checkout-button') }
   get orderTotal()      { return cy.get('.order-total > td') }
-  get errorNotice()     { return cy.get('.woocommerce-error, [role="alert"]') }
+  get errorNotice()     { return cy.get('[role="alert"]') }
 
   // ── visitProduct ──────────────────────────────────────────────────────────
   visitProduct(slug) {
@@ -30,25 +18,34 @@ class CartPage {
   }
 
   // ── selectVariation ───────────────────────────────────────────────────────
-  // Clica nos botões <li> visíveis gerados pelo plugin Variation Swatches.
-  // O plugin sincroniza o <select> oculto automaticamente após o clique.
+  // 1. Clica no swatch visual [title='X']
+  // 2. Seta o valor no <select> oculto + dispara change
+  //    → WooCommerce escuta o change e habilita o botão
   selectVariation(size = 'L', color = 'Black') {
 
-    // Tamanho — ex: li.button-variable-item-L
-    cy.get(`li.button-variable-item-${size}`, { timeout: 10000 })
-      .should('exist')
+    // Tamanho
+    cy.get(`[title='${size}']`, { timeout: 10000 })
+      .first()
       .click({ force: true })
+
+    cy.get('select[name="attribute_size"]')
+      .invoke('val', size)
+      .trigger('change', { force: true })
 
     cy.wait(400)
 
-    // Cor — ex: li.button-variable-item-Black
-    cy.get(`li.button-variable-item-${color}`, { timeout: 10000 })
-      .should('exist')
+    // Cor
+    cy.get(`[title='${color}']`, { timeout: 10000 })
+      .first()
       .click({ force: true })
+
+    cy.get('select[name="attribute_color"]')
+      .invoke('val', color)
+      .trigger('change', { force: true })
 
     cy.wait(400)
 
-    // Aguarda o botão "Adicionar ao carrinho" sair do estado disabled
+    // Aguarda botão sair do estado disabled
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
       .and('not.have.class', 'wc-variation-selection-needed')
@@ -74,8 +71,10 @@ class CartPage {
 
   // ── Assertions ────────────────────────────────────────────────────────────
   shouldShowSuccess() {
-    cy.get('.woocommerce-message, .added_to_cart, [class*="cart-notice"]', { timeout: 20000 })
+    // Seletor confirmado via DevTools: [role='alert']
+    cy.get('[role="alert"]', { timeout: 20000 })
       .should('exist')
+      .and('be.visible')
   }
 
   shouldShowTotal(total) {
