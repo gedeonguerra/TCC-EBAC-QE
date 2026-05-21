@@ -1,11 +1,18 @@
 // Page Object Model — CartPage
 // US-0001: Adicionar item ao carrinho
-// FIX: seletores corrigidos para attribute_size e attribute_color
-//      conforme DOM real de lojaebac.ebaconline.art.br
+//
+// Plugin: WooCommerce Variation Swatches
+// O <select> fica oculto (display:none). Os botões visuais são <li> com
+// classe .button-variable-item-{value} — é neles que o Cypress deve clicar.
+//
+// Seletores confirmados via DevTools:
+//   Tamanho : li.button-variable-item-XS | S | M | L | XL
+//   Cor     : li.button-variable-item-Black | Purple | Red
+//   Guard   : table.variations (não form.variations_form)
 
 class CartPage {
 
-  // ── Getters ──────────────────────────────────────────────────────────────
+  // ── Getters ───────────────────────────────────────────────────────────────
   get qtyField()        { return cy.get('input.qty') }
   get addToCartButton() { return cy.get('.single_add_to_cart_button') }
   get cartMessage()     { return cy.get('.woocommerce-message') }
@@ -14,35 +21,34 @@ class CartPage {
   get orderTotal()      { return cy.get('.order-total > td') }
   get errorNotice()     { return cy.get('.woocommerce-error, [role="alert"]') }
 
-  // ── visitProduct ─────────────────────────────────────────────────────────
+  // ── visitProduct ──────────────────────────────────────────────────────────
   visitProduct(slug) {
     cy.visit(`/product/${slug}/`, { failOnStatusCode: false })
     cy.url({ timeout: 30000 }).should('include', slug)
-    cy.get('form.variations_form', { timeout: 15000 }).should('exist')
+    cy.get('table.variations', { timeout: 15000 }).should('exist')
     cy.get('.single_add_to_cart_button', { timeout: 30000 }).should('exist')
   }
 
-  // ── selectVariation ──────────────────────────────────────────────────────
-  // Seletores corretos confirmados via DevTools:
-  //   select[name="attribute_size"]  → valores: XS | S | M | L | XL
-  //   select[name="attribute_color"] → valores: Black | Purple | Red
+  // ── selectVariation ───────────────────────────────────────────────────────
+  // Clica nos botões <li> visíveis gerados pelo plugin Variation Swatches.
+  // O plugin sincroniza o <select> oculto automaticamente após o clique.
   selectVariation(size = 'L', color = 'Black') {
 
-    // Tamanho
-    cy.get('select[name="attribute_size"]', { timeout: 10000 })
-      .should('be.visible')
-      .select(size)
+    // Tamanho — ex: li.button-variable-item-L
+    cy.get(`li.button-variable-item-${size}`, { timeout: 10000 })
+      .should('exist')
+      .click({ force: true })
 
-    cy.wait(300)
+    cy.wait(400)
 
-    // Cor
-    cy.get('select[name="attribute_color"]', { timeout: 10000 })
-      .should('be.visible')
-      .select(color)
+    // Cor — ex: li.button-variable-item-Black
+    cy.get(`li.button-variable-item-${color}`, { timeout: 10000 })
+      .should('exist')
+      .click({ force: true })
 
-    cy.wait(300)
+    cy.wait(400)
 
-    // Aguarda botão sair do estado disabled (variação 100% selecionada)
+    // Aguarda o botão "Adicionar ao carrinho" sair do estado disabled
     cy.get('.single_add_to_cart_button', { timeout: 15000 })
       .should('not.have.class', 'disabled')
       .and('not.have.class', 'wc-variation-selection-needed')
