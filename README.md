@@ -1,128 +1,130 @@
-# TCC-EBAC-QE 🎓
+# EBAC Shop — Test Automation Suite
 
-> **Trabalho de Conclusão de Curso** — Profissão: Engenheiro de Qualidade de Software  
-> **Projeto:** EBAC Shop — `http://lojaebac.ebaconline.art.br/`
+Suíte de testes automatizados para o e-commerce **EBAC Shop**, cobrindo interface web, API REST, aplicativo mobile e performance, com pipeline de integração contínua rodando a cada push.
+
+O projeto nasceu como Trabalho de Conclusão de Curso (Engenharia de Qualidade de Software) e reproduz, em escala reduzida, o que se espera de uma esteira de qualidade em ambiente real: estratégia de testes documentada, rastreabilidade entre requisitos e automações, e execução contínua via CI/CD.
 
 [![UI Tests](https://github.com/gedeonguerra/TCC-EBAC-QE/actions/workflows/ci.yml/badge.svg)](https://github.com/gedeonguerra/TCC-EBAC-QE/actions)
 
 ---
 
-## 📋 Histórias de Usuário Cobertas
+## Sobre a aplicação sob teste
 
-| US | Funcionalidade | Prioridade |
-|----|---------------|-----------|
-| US-0001 | Adicionar item ao carrinho | Média |
-| US-0002 | Login na plataforma | Média |
-| US-0003 | API de Cupons | Média |
-
----
-
-## 🗂️ Estrutura do Projeto
-
-```
-TCC-EBAC-QE/
-├── UI/                         # Testes de interface Web
-│   ├── pages/
-│   │   ├── LoginPage.js        # POM – Página de Login
-│   │   └── CartPage.js         # POM – Carrinho de Compras
-│   ├── tests/
-│   │   ├── login.spec.js       # 6 testes – US-0002
-│   │   └── cart.spec.js        # 8 testes – US-0001
-│   ├── playwright.config.js
-│   └── package.json
-│
-├── API/                        # Testes de API REST
-│   ├── tests/
-│   │   └── coupons.test.js     # 9 testes – US-0003 (+ contrato)
-│   └── package.json
-│
-├── Mobile/                     # Testes Mobile Android
-│   ├── pages/
-│   │   └── CatalogPage.js      # POM – Catálogo de Produtos
-│   ├── tests/
-│   │   └── catalog.test.js     # 5 testes – Catálogo Mobile
-│   ├── wdio.conf.js
-│   └── package.json
-│
-├── Performance/                # Testes de carga K6
-│   ├── login.k6.js             # 20 VUs | 2 min | Login
-│   └── coupons.k6.js           # 20 VUs | 2 min | API Cupons
-│
-└── .github/workflows/
-    └── ci.yml                  # Pipeline GitHub Actions
-```
+| Item | Detalhe |
+|---|---|
+| Aplicação | EBAC Shop (WooCommerce) |
+| URL | `http://lojaebac.ebaconline.art.br` |
+| Funcionalidades cobertas | Carrinho de compras, Login, API de Cupons, Catálogo (mobile) |
 
 ---
 
-## 🚀 Como Executar
+## Cobertura de testes
 
-### Pré-requisitos
-- Node.js 20+
-- K6 instalado (`brew install k6` ou via apt)
-- Appium (para Mobile)
+| Camada | Ferramenta | Cenários automatizados | Escopo |
+|---|---|---|---|
+| UI (Web) | Cypress | 9 | Login e Carrinho de compras |
+| API | Supertest + Jest | 6 | CRUD e contrato da API de Cupons |
+| Mobile (Android) | Appium + WebdriverIO | 5 | Catálogo de produtos |
+| Performance | k6 | 2 scripts | Login e API de Cupons (20 VUs / 120s) |
 
-### Testes de UI (Playwright)
+Os cenários são especificados em Gherkin (BDD) antes da automação, e cada caso de teste é rastreável até a User Story de origem — a matriz completa está em [`CASOS-DE-TESTE.md`](./CASOS-DE-TESTE.md).
+
+Um dos cenários de carrinho (`CT-001-03`) documenta um bug real encontrado na regra de limite de quantidade por item.
+
+---
+
+## Estrutura do projeto
+
+```
+├── UI/                     # Testes de interface — Cypress
+│   ├── cypress/e2e/        # Specs: login e carrinho
+│   ├── cypress/pages/      # Page Objects
+│   └── cypress/support/    # Comandos customizados
+│
+├── API/                    # Testes de API — Supertest + Jest
+│   └── tests/              # Cupons: CRUD + validação de contrato (Joi)
+│
+├── Mobile/                 # Testes mobile — Appium + WebdriverIO
+│   ├── pages/               # Page Objects
+│   └── tests/               # Catálogo de produtos
+│
+├── Performance/            # Testes de carga — k6
+│   ├── login.k6.js
+│   ├── coupons.k6.js
+│   └── k6-performance.js
+│
+├── Gherkin/                # Especificação de cenários em BDD
+│
+├── ESTRATEGIA.md           # Estratégia de testes: técnicas, riscos, critérios
+├── CASOS-DE-TESTE.md       # Casos de teste detalhados + matriz de rastreabilidade
+│
+└── .github/workflows/      # Pipeline de CI
+```
+
+---
+
+## Stack técnica
+
+| Camada | Ferramentas |
+|---|---|
+| UI | Cypress |
+| API | Supertest, Jest, Joi (validação de schema) |
+| Mobile | Appium, WebdriverIO, Allure Reporter |
+| Performance | k6 |
+| CI/CD | GitHub Actions |
+
+**Técnicas de design de teste aplicadas:** Partição de Equivalência, Análise de Valor Limite, Tabela de Decisão e Validação de Contrato.
+
+---
+
+## Pipeline de CI/CD
+
+O workflow (`.github/workflows/ci.yml`) roda automaticamente em push e pull request para `main` e `develop`, com três jobs paralelos:
+
+1. **`api-tests`** — instala dependências, executa a suíte de API e publica o relatório (`api-report.json`) como artefato.
+2. **`ui-tests`** — executa a suíte Cypress e publica screenshots/vídeos como artefato em caso de falha.
+3. **`performance-tests`** — instala o k6 e executa os testes de carga de Login e Cupons, publicando os relatórios gerados.
+
+---
+
+## Como executar localmente
+
+Pré-requisitos: Node.js 20+, k6 instalado, emulador Android configurado (para os testes mobile).
+
+**Testes de UI (Cypress)**
 ```bash
 cd UI
 npm install
-npx playwright install chromium
-npm test
+npm test              # execução headless
+npm run test:open     # modo interativo
 ```
 
-### Testes de API (Supertest + Jest)
+**Testes de API (Supertest + Jest)**
 ```bash
 cd API
 npm install
 npm test
 ```
 
-### Testes Mobile (Appium + WebDriverIO)
+**Testes Mobile (Appium + WebdriverIO)**
 ```bash
 cd Mobile
 npm install
-# Subir emulador Android antes
+# subir o emulador Android antes de rodar
 npm test
 ```
 
-### Testes de Performance (K6)
+**Testes de Performance (k6)**
 ```bash
-# Login
 k6 run Performance/login.k6.js
-
-# API Cupons
 k6 run Performance/coupons.k6.js
 ```
 
 ---
 
-## 🛠️ Stack de Ferramentas
+## Documentação complementar
 
-| Camada | Ferramenta | Justificativa |
-|--------|-----------|---------------|
-| UI | Playwright | Execução paralela, multi-browser, relatório HTML nativo |
-| API | Supertest + Jest | Integração nativa Node.js, validação de contratos |
-| Mobile | Appium + WDIO | Padrão da indústria para Android/iOS |
-| Performance | K6 | Scripting em JS, thresholds configuráveis, CI-friendly |
-| CI/CD | GitHub Actions | Nativo ao repositório, gratuito para projetos públicos |
-
----
-
-## 📊 Cobertura de Testes
-
-| Tipo | Casos | Status |
-|------|-------|--------|
-| UI (Playwright) | 14 | ✅ Automatizado |
-| API (Supertest) | 9 | ✅ Automatizado |
-| Mobile (Appium) | 5 | ✅ Automatizado |
-| Performance (K6) | 2 | ✅ Automatizado |
-| **Total** | **30** | |
-
----
-
-## ⚙️ CI/CD — GitHub Actions
-
-O pipeline executa automaticamente em pushes para `main` e `develop`:
-
-1. **Job `api-tests`** → Jest + Supertest → artefato `api-report.json`
-2. **Job `ui-tests`** → Playwright → artefato `playwright-report/`
-3. **Job `performance-tests`** → K6 → artefatos `*-summary.json`
+- [`ESTRATEGIA.md`](./ESTRATEGIA.md) — objetivo, escopo, ambiente de testes, riscos e critérios de entrada/saída
+- [`CASOS-DE-TESTE.md`](./CASOS-DE-TESTE.md) — casos de teste detalhados, técnica aplicada e matriz de rastreabilidade
+- [`Gherkin/`](./Gherkin) — cenários em BDD por User Story
+- [`TCC-EBAC-QE.docx`](./TCC-EBAC-QE.docx) — monografia completa do TCC, em formato ABNT: introdução, estratégia, casos de teste, CI/CD e conclusão
