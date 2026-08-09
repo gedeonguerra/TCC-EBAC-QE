@@ -1,34 +1,10 @@
 # Mobile – Testes no App EBAC Shop
 
-## Funcionalidade coberta
-**Catálogo de Produtos** (conforme especificado no TCC)
+Testes E2E mobile cobrindo Android e iOS.
+Framework: **Appium + WebDriverIO** · Pattern: **Page Object Model (POM)**
 
-## Plataforma escolhida: Android
-Framework: **Appium + WebDriverIO**
-Pattern: **Page Object Model (POM)**
-
-## Setup
-
-1. Instalar dependências:
-```bash
-npm install
-```
-
-2. Instalar Appium:
-```bash
-npm install -g appium
-appium driver install uiautomator2
-```
-
-3. Baixar o APK:
-- Android: https://github.com/EBAC-QE/testes-mobile-ebac-shop/tree/main/app/android
-
-4. Iniciar emulador Android e executar:
-```bash
-npx wdio run wdio.conf.js
-```
-
-## Cenários de Teste – Catálogo de Produtos
+## Android — Catálogo de Produtos
+Conforme especificado no TCC. Detalhes em [`Android/`](./Android).
 
 | ID | Cenário | Tipo |
 |----|---------|------|
@@ -38,12 +14,38 @@ npx wdio run wdio.conf.js
 | CT-MOB-004 | Busca com termo inexistente exibe mensagem | Caminho Negativo |
 | CT-MOB-005 | Toque em produto abre tela de detalhes | Caminho Feliz |
 
+\`\`\`bash
+cd Android
+npm install
+npm install -g appium && appium driver install uiautomator2
+npx wdio run wdio.conf.js
+\`\`\`
+
+## iOS — Checkout completo
+
+> Projeto de estudo/exercício de curso — mantido como registro de aprendizado.
+
+Fluxo de compra completo (login → carrinho → pagamento → confirmação), executado via Appium + SauceLabs (iOS Simulator). Detalhes em [`iOS/`](./iOS).
+
+1. Login → 2. Browse → 3. Selecionar produto → 4. Adicionar ao carrinho → 5. Endereço → 6. Pagamento (Cash on Delivery) → 7. Checkout → 8. Validar "Order Success"
+
+\`\`\`bash
+cd iOS
+npm install
+# criar .env a partir de env.example com credenciais SauceLabs
+npm run test:sauce:ios
+\`\`\`
+
 ## Estrutura de pastas
-```
+\`\`\`
 Mobile/
-├── tests/
-│   └── catalog.test.js
-├── pages/
-│   └── CatalogPage.js
-└── wdio.conf.js
-```
+├── Android/
+│   ├── tests/catalog.test.js
+│   ├── pages/CatalogPage.js
+│   └── wdio.conf.js
+└── iOS/
+    ├── test/pageobjects/
+    ├── test/specs/checkout.spec.js
+    ├── wdio.conf.js
+    └── env.example
+\`\`\`
